@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import Authors from './components/Authors'
+import Authors from './components/Author/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 
@@ -14,11 +14,11 @@ const App = () => {
         <button onClick={() => setPage('add')}>add book</button>
       </div>
 
-      <Authors show={page === 'authors'} />
+      {page === 'authors' ? <Authors /> : null}
 
-      <Books show={page === 'books'} />
+      {page === 'books' ? <Books /> : null}
 
-      <NewBook show={page === 'add'} />
+      {page === 'add' ? <NewBook /> : null}
     </div>
   )
 }
