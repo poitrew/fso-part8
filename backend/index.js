@@ -67,7 +67,7 @@ const typeDefs = gql`
       author: String!
       genres: [String!]!
     ): Book
-    editAuthor(name: String!, setBornTo: Int!): Author
+    editBorn(name: String!, setBornTo: Int!): Author
   }
 `
 
@@ -151,19 +151,23 @@ const resolvers = {
       }
     },
     // --------------
-    editAuthor: async (root, args) => {
-      const author = await Author.findOne({ name: args.name })
-      if (!author) {
-        return null
-      }
+    editBorn: async (root, args, context) => {
+      if (context.currentUser) {
+        const author = await Author.findOne({ name: args.name })
+        if (!author) {
+          return null
+        }
 
-      author.born = args.setBornTo
-      try {
-        await author.save()
-      } catch (err) {
-        throw new UserInputError(err.message, { invalidArgs: args })
+        author.born = args.setBornTo
+        try {
+          await author.save()
+        } catch (err) {
+          throw new UserInputError(err.message, { invalidArgs: args })
+        }
+        return author
+      } else {
+        throw new AuthenticationError('Not authenticated')
       }
-      return author
     },
   },
   Author: {
