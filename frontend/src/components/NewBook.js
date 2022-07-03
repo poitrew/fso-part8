@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client'
+import { useMutation, gql } from '@apollo/client'
 import { useState } from 'react'
 import { ADD_BOOK } from '../queries'
 
@@ -9,7 +9,31 @@ const NewBook = () => {
   const [genre, setGenre] = useState('')
   const [genres, setGenres] = useState([])
 
-  const [createBook] = useMutation(ADD_BOOK)
+  const [createBook] = useMutation(ADD_BOOK, {
+    update: (cache, { data: addBook }) => {
+      cache.modify({
+        fields: {
+          allBooks(existingBooks = []) {
+            const newBookRef = cache.writeFragment({
+              data: addBook,
+              fragment: gql`
+                fragment NewBook on Book {
+                  id
+                  title
+                  published
+                  author {
+                    name
+                  }
+                  genres
+                }
+              `,
+            })
+            return [...existingBooks, newBookRef]
+          },
+        },
+      })
+    },
+  })
 
   const submit = async (event) => {
     event.preventDefault()

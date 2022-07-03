@@ -60,6 +60,7 @@ export const ADD_BOOK = gql`
       author {
         name
       }
+      genres
     }
   }
 `

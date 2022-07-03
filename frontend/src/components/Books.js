@@ -1,17 +1,22 @@
-import { useState } from 'react'
+import { useQuery } from '@apollo/client'
+import { useEffect, useState } from 'react'
+import { ALL_BOOKS } from '../queries'
 
-const Books = ({ books }) => {
-  const [list, setList] = useState(books)
-  const filters = []
-    .concat(...books.map((book) => book.genres))
-    .filter((f, index, arr) => index === arr.indexOf(f))
+const Books = () => {
+  const { data, loading, refetch } = useQuery(ALL_BOOKS)
+  const [filter, setFilter] = useState([])
 
-  const filterer = (value) => {
-    if (value === 'all') {
-      return setList(books)
+  useEffect(() => {
+    if (data) {
+      setFilter(
+        []
+          .concat(...data?.allBooks.map((b) => b.genres))
+          .filter((g, i, a) => a.indexOf(g) === i)
+      )
     }
-    return setList(books.filter((b) => b.genres.includes(value)))
-  }
+  }, [loading]) // eslint-disable-line
+
+  if (loading) return 'loading...'
 
   return (
     <div>
@@ -24,7 +29,7 @@ const Books = ({ books }) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {list.map((b) => (
+          {data.allBooks.map((b) => (
             <tr key={b.title}>
               <td>{b.title}</td>
               <td>{b.author.name}</td>
@@ -33,14 +38,20 @@ const Books = ({ books }) => {
           ))}
         </tbody>
       </table>
-
       <div>
-        {filters.map((f, index) => (
-          <button key={index} onClick={() => filterer(f)}>
-            {f}
+        {filter.map((g) => (
+          <button
+            onClick={() => {
+              refetch({ favoriteGenre: g })
+            }}
+            key={g}
+          >
+            {g}
           </button>
         ))}
-        <button onClick={() => filterer('all')}>all genres</button>
+        <button onClick={() => refetch({ favoriteGenre: null })}>
+          all genres
+        </button>
       </div>
     </div>
   )

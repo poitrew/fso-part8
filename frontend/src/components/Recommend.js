@@ -1,16 +1,24 @@
-import { useQuery } from '@apollo/client'
-import { GET_USER } from '../queries'
+import { useLazyQuery, useQuery } from '@apollo/client'
+import { ALL_BOOKS, GET_USER } from '../queries'
 
-const Recommend = ({ books }) => {
-  const { loading, data } = useQuery(GET_USER, { fetchPolicy: 'network-only' })
+const Recommend = () => {
+  const [bookQuery, { loading: bookloading, data: bookData }] =
+    useLazyQuery(ALL_BOOKS)
+  const { loading: userLoading, data: userData } = useQuery(GET_USER, {
+    fetchPolicy: 'network-only',
+    onCompleted: (data) => {
+      bookQuery({ genre: data.favoriteGenre })
+    },
+  })
 
-  if (loading) return 'loading...'
+  if (userLoading || bookloading) return 'loading...'
 
   return (
     <div>
       <h2>recommendations</h2>
       <p>
-        books in your favorite genre <strong>{data.me.favoriteGenre}</strong>
+        books in your favorite genre{' '}
+        <strong>{userData.me.favoriteGenre}</strong>
       </p>
       <table>
         <tbody>
@@ -19,8 +27,8 @@ const Recommend = ({ books }) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {books
-            .filter((b) => b.genres.includes(data.me.favoriteGenre))
+          {bookData?.allBooks
+            .filter((b) => b.genres.includes(userData.me.favoriteGenre))
             .map((b) => (
               <tr key={b.title}>
                 <td>{b.title}</td>

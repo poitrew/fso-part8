@@ -5,19 +5,12 @@ import LoginForm from './components/LoginForm'
 import NewBook from './components/NewBook'
 import Recommend from './components/Recommend'
 import { useApolloClient } from '@apollo/client'
-import { useQuery } from '@apollo/client'
-import { ALL_BOOKS } from './queries'
 
 const App = () => {
   const [page, setPage] = useState('authors')
   const [token, setToken] = useState(localStorage.getItem('lib-user-token'))
   const [errorMessage, setErrorMessage] = useState()
-  const { loading, data } = useQuery(ALL_BOOKS)
   const client = useApolloClient()
-
-  if (loading) return 'loading...'
-
-  const books = data.allBooks
 
   const logout = () => {
     setPage('login')
@@ -44,11 +37,11 @@ const App = () => {
 
       {page === 'authors' ? <Authors /> : null}
 
-      {page === 'books' ? <Books books={books} /> : null}
+      {page === 'books' ? <Books /> : null}
 
       {page === 'add' && token ? <NewBook /> : null}
 
-      {page === 'recommend' && token ? <Recommend books={books} /> : null}
+      {page === 'recommend' && token ? <Recommend /> : null}
 
       {page === 'login' && !token ? (
         <>
