@@ -1,14 +1,17 @@
-import { useQuery } from '@apollo/client'
-import { ALL_BOOKS } from '../queries'
+import { useState } from 'react'
 
-const Books = () => {
-  const result = useQuery(ALL_BOOKS)
+const Books = ({ books }) => {
+  const [list, setList] = useState(books)
+  const filters = []
+    .concat(...books.map((book) => book.genres))
+    .filter((f, index, arr) => index === arr.indexOf(f))
 
-  if (result.loading) {
-    return <div>loading...</div>
+  const filterer = (value) => {
+    if (value === 'all') {
+      return setList(books)
+    }
+    return setList(books.filter((b) => b.genres.includes(value)))
   }
-
-  const books = result.data.allBooks
 
   return (
     <div>
@@ -21,15 +24,24 @@ const Books = () => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {books.map((a) => (
-            <tr key={a.title}>
-              <td>{a.title}</td>
-              <td>{a.author}</td>
-              <td>{a.published}</td>
+          {list.map((b) => (
+            <tr key={b.title}>
+              <td>{b.title}</td>
+              <td>{b.author.name}</td>
+              <td>{b.published}</td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      <div>
+        {filters.map((f, index) => (
+          <button key={index} onClick={() => filterer(f)}>
+            {f}
+          </button>
+        ))}
+        <button onClick={() => filterer('all')}>all genres</button>
+      </div>
     </div>
   )
 }
